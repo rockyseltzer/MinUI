@@ -1,5 +1,5 @@
 CORES = fceumm gambatte gpsp pcsx_rearmed picodrive snes9x2005_plus
-CORES+= mednafen_pce_fast mednafen_vb mednafen_supafaust mgba race
+CORES+= mednafen_pce_fast mednafen_vb mednafen_supafaust mgba pokemini race
 # CORES+= fake-08
 
 ###############################
@@ -29,9 +29,11 @@ pcsx_rearmed_MAKEFILE = Makefile.libretro
 
 picodrive_REPO = https://github.com/irixxxx/picodrive
 picodrive_MAKEFILE = Makefile.libretro
+picodrive_HASH = b0be121b7d58d6ee1ee2809974e62893c80a8264
 
 pokemini_REPO = https://github.com/libretro/PokeMini
 pokemini_MAKEFILE = Makefile.libretro
+pokemini_HASH = 78656d4615691c393e65e48672ce5fff5b1f97d3
 
 snes9x2005_plus_REPO = https://github.com/libretro/snes9x2005
 snes9x2005_plus_FLAGS = USE_BLARGG_APU=1

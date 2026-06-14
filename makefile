@@ -66,6 +66,7 @@ cores: # TODO: can't assume every platform will have the same stock cores (platf
 	
 	# extras
 ifeq ($(PLATFORM), trimuismart)
+	cp ./workspace/$(PLATFORM)/cores/output/pokemini_libretro.so ./build/EXTRAS/Emus/$(PLATFORM)/PKM.pak
 else ifeq ($(PLATFORM), m17)
 else ifneq ($(PLATFORM),gkdpixel)
 endif
