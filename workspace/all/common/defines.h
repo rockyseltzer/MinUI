@@ -17,6 +17,15 @@
 #define FONT_PATH RES_PATH "/font1.ttf"
 #define USERDATA_PATH SDCARD_PATH "/.userdata/" PLATFORM
 #define SHARED_USERDATA_PATH SDCARD_PATH "/.userdata/shared"
+
+// GFX scaling options — ported from NextUI so config.c compiles (game-switcher field, unused here)
+enum
+{
+  GFX_SCALE_FULLSCREEN = 0,
+  GFX_SCALE_FIT,
+  GFX_SCALE_FILL,
+  GFX_SCALE_NUM_OPTIONS // do not use
+};
 #define PAKS_PATH SYSTEM_PATH "/paks"
 #define RECENT_PATH SHARED_USERDATA_PATH "/.minui/recent.txt"
 #define SIMPLE_MODE_PATH SHARED_USERDATA_PATH "/enable-simple-mode"

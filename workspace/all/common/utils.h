@@ -27,4 +27,6 @@ int getInt(char* path);
 
 uint64_t getMicroseconds(void);
 
+static inline int clamp(int x, int lower, int upper) { return x < lower ? lower : (x > upper ? upper : x); }
+static inline double clampd(double x, double lower, double upper) { return x < lower ? lower : (x > upper ? upper : x); }
 #endif
