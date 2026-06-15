@@ -17,7 +17,7 @@
 #include "defines.h"
 #include "api.h"
 #include "config.h"
-#include "config.h"
+#include "ma_cheats.h"
 #include "utils.h"
 #include "scaler.h"
 
@@ -102,6 +102,8 @@ static struct Core {
 	bool (*load_game)(const struct retro_game_info *game);
 	bool (*load_game_special)(unsigned game_type, const struct retro_game_info *info, size_t num_info);
 	void (*unload_game)(void);
+void (*cheat_reset)(void);
+void (*cheat_set)(unsigned index, bool enabled, const char *code);
 	unsigned (*get_region)(void);
 	void *(*get_memory_data)(unsigned id);
 	size_t (*get_memory_size)(unsigned id);
@@ -204,6 +206,7 @@ static void Game_open(char* path) {
 	
 	strcpy((char*)game.path, path);
 	strcpy((char*)game.name, strrchr(path, '/')+1);
+strcpy((char*)game.alt_name, game.name);
 	
 	// if we have a zip file
 	if (suffixMatch(".zip", game.path)) {
@@ -2912,6 +2915,8 @@ void Core_open(const char* core_path, const char* tag_name) {
 	core.load_game = dlsym(core.handle, "retro_load_game");
 	core.load_game_special = dlsym(core.handle, "retro_load_game_special");
 	core.unload_game = dlsym(core.handle, "retro_unload_game");
+core.cheat_reset = dlsym(core.handle, "retro_cheat_reset");
+core.cheat_set = dlsym(core.handle, "retro_cheat_set");
 	core.get_region = dlsym(core.handle, "retro_get_region");
 	core.get_memory_data = dlsym(core.handle, "retro_get_memory_data");
 	core.get_memory_size = dlsym(core.handle, "retro_get_memory_size");
@@ -2946,6 +2951,7 @@ void Core_open(const char* core_path, const char* tag_name) {
 	sprintf((char*)core.states_dir, SHARED_USERDATA_PATH "/%s-%s", core.tag, core.name);
 	sprintf((char*)core.saves_dir, SDCARD_PATH "/Saves/%s", core.tag);
 	sprintf((char*)core.bios_dir, SDCARD_PATH "/Bios/%s", core.tag);
+sprintf((char*)core.cheats_dir, SDCARD_PATH "/Cheats/%s", core.tag);
 	
 	char cmd[512];
 	sprintf(cmd, "mkdir -p \"%s\"; mkdir -p \"%s\"", core.config_dir, core.states_dir);
@@ -2972,6 +2978,17 @@ void Core_load(void) {
 	LOG_info("game path: %s (%i)\n", game_info.path, game.size);
 	
 	core.load_game(&game_info);
+
+    // load & apply cheats for this game
+    if (Cheats_load()) {
+        if (core.cheat_reset) core.cheat_reset();
+        if (core.cheat_set) {
+            for (size_t i=0; i<cheatcodes.count; i++) {
+                if (cheatcodes.cheats[i].enabled && cheatcodes.cheats[i].code)
+                    core.cheat_set((unsigned)i, true, cheatcodes.cheats[i].code);
+            }
+        }
+    }
 	
 	SRAM_read();
 	RTC_read();
@@ -3000,6 +3017,7 @@ void Core_quit(void) {
 		SRAM_write();
 		RTC_write();
 		core.unload_game();
+Cheats_free();
 		core.deinit();
 		core.initialized = 0;
 	}
