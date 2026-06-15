@@ -29,4 +29,6 @@ uint64_t getMicroseconds(void);
 
 static inline int clamp(int x, int lower, int upper) { return x < lower ? lower : (x > upper ? upper : x); }
 static inline double clampd(double x, double lower, double upper) { return x < lower ? lower : (x > upper ? upper : x); }
+void truncateString(char *string, size_t max_len);
+void wrapString(char *string, size_t max_len, size_t max_lines);
 #endif

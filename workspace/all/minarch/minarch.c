@@ -16,6 +16,8 @@
 #include "libretro.h"
 #include "defines.h"
 #include "api.h"
+#include "config.h"
+#include "config.h"
 #include "utils.h"
 #include "scaler.h"
 
@@ -78,6 +80,7 @@ static struct Core {
 	const char states_dir[MAX_PATH]; // eg. /mnt/sdcard/.userdata/arm-480/GB-gambatte
 	const char saves_dir[MAX_PATH]; // eg. /mnt/sdcard/Saves/GB
 	const char bios_dir[MAX_PATH]; // eg. /mnt/sdcard/Bios/GB
+	const char cheats_dir[MAX_PATH]; // eg. /mnt/SDCARD/Cheats/GB
 	
 	double fps;
 	double sample_rate;
@@ -187,12 +190,14 @@ static int Zip_inflate(FILE* zip, FILE* dst, size_t size) { // compressed
 static struct Game {
 	char path[MAX_PATH];
 	char name[MAX_PATH]; // TODO: rename to basename?
+	char alt_name[MAX_PATH]; // alternate name for cheat path matching
 	char m3u_path[MAX_PATH];
 	char tmp_path[MAX_PATH]; // location of unzipped file
 	void* data;
 	size_t size;
 	int is_open;
 } game;
+
 static void Game_open(char* path) {
 	LOG_info("Game_open\n");
 	memset(&game, 0, sizeof(game));
@@ -4828,3 +4833,6 @@ finish:
 	
 	return EXIT_SUCCESS;
 }
+
+
+#include "ma_cheats.c" // cheat engine (amalgamated after all minarch helpers)
