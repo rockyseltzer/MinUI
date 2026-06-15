@@ -9,6 +9,29 @@
 
 #include "defines.h"
 #include "api.h"
+#include "config.h"
+
+// --- config foundation callbacks (Stage 2) ---
+static int MinUI_onFontChange(const char* path) {
+    if (font.large)  TTF_CloseFont(font.large);
+    if (font.medium) TTF_CloseFont(font.medium);
+    if (font.small)  TTF_CloseFont(font.small);
+    if (font.tiny)   TTF_CloseFont(font.tiny);
+    font.large  = TTF_OpenFont(path, SCALE1(FONT_LARGE));
+    font.medium = TTF_OpenFont(path, SCALE1(FONT_MEDIUM));
+    font.small  = TTF_OpenFont(path, SCALE1(FONT_SMALL));
+    font.tiny   = TTF_OpenFont(path, SCALE1(FONT_TINY));
+    int style = CFG_getFontStyle();
+    if (font.large)  TTF_SetFontStyle(font.large, style);
+    if (font.medium) TTF_SetFontStyle(font.medium, style);
+    if (font.small)  TTF_SetFontStyle(font.small, style);
+    if (font.tiny)   TTF_SetFontStyle(font.tiny, style);
+    return (font.large && font.medium && font.small && font.tiny) ? 0 : -1;
+}
+static int MinUI_onColorSet(void) {
+    // Stage 3 will bridge config colors into the renderer.
+    return 0;
+}
 #include "utils.h"
 
 ///////////////////////////////////////
@@ -1310,6 +1333,7 @@ int main (int argc, char *argv[]) {
 	InitSettings();
 	
 	SDL_Surface* screen = GFX_init(MODE_MAIN);
+	CFG_init(MinUI_onFontChange, MinUI_onColorSet);
 	// LOG_info("- graphics init: %lu\n", SDL_GetTicks() - main_begin);
 	
 	PAD_init();
