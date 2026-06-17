@@ -19,6 +19,7 @@
 #include "config.h"
 #include "ma_cheats.h"
 static void Cheats_apply(void);
+static void Cheats_loadEnabled(void);
 #include "utils.h"
 #include "scaler.h"
 
@@ -2981,7 +2982,7 @@ void Core_load(void) {
 	core.load_game(&game_info);
 
     // load & apply cheats for this game
-    if (Cheats_load()) Cheats_apply();
+    if (Cheats_load()) { Cheats_loadEnabled(); Cheats_apply(); }
 	
 	SRAM_read();
 	RTC_read();
@@ -3588,12 +3589,43 @@ static void Cheats_apply(void) {
         }
     }
 }
+static void Cheats_savePath(char* out) {
+    snprintf(out, MAX_PATH, "%s/%s.cheats", core.config_dir, game.name);
+}
+static void Cheats_saveEnabled(void) {
+    char path[MAX_PATH];
+    Cheats_savePath(path);
+    FILE* f = fopen(path, "w");
+    if (!f) return;
+    for (size_t i=0; i<cheatcodes.count; i++) {
+        if (cheatcodes.cheats[i].enabled && cheatcodes.cheats[i].code)
+            fprintf(f, "%s\n", cheatcodes.cheats[i].code);
+    }
+    fclose(f);
+}
+static void Cheats_loadEnabled(void) {
+    char path[MAX_PATH];
+    Cheats_savePath(path);
+    FILE* f = fopen(path, "r");
+    if (!f) return;
+    for (size_t i=0; i<cheatcodes.count; i++) cheatcodes.cheats[i].enabled = 0;
+    char line[MAX_PATH];
+    while (fgets(line, sizeof(line), f)) {
+        line[strcspn(line, "\r\n")] = 0;
+        if (line[0]==0) continue;
+        for (size_t i=0; i<cheatcodes.count; i++)
+            if (cheatcodes.cheats[i].code && strcmp(cheatcodes.cheats[i].code, line)==0)
+                cheatcodes.cheats[i].enabled = 1;
+    }
+    fclose(f);
+}
 static char* cheat_labels[] = { "OFF", "ON", NULL };
 static int OptionCheats_optionChanged(MenuList* list, int i) {
     MenuItem* item = &list->items[i];
     if ((size_t)i < cheatcodes.count) {
         cheatcodes.cheats[i].enabled = item->value;
         Cheats_apply();
+Cheats_saveEnabled();
     }
     return MENU_CALLBACK_NOP;
 }
