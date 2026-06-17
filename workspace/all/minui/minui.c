@@ -1354,6 +1354,7 @@ int main (int argc, char *argv[]) {
 
 	PAD_reset();
 	int dirty = 1;
+int is_scrolling = 0;
 	int show_version = 0;
 	int show_setting = 0; // 1=brightness,2=volume
 	int was_online = PLAT_isOnline();
@@ -1509,6 +1510,10 @@ int main (int argc, char *argv[]) {
 		
 		if (dirty) {
 			GFX_clear(screen);
+                        is_scrolling = 0;
+                        static int scroll_sel = -1; static unsigned long scroll_t0 = 0;
+                        if (top->selected != scroll_sel) { scroll_sel = top->selected; scroll_t0 = now; }
+                        unsigned long scroll_elapsed = now - scroll_t0;
 			
 			int ox;
 			int oy;
@@ -1534,11 +1539,10 @@ int main (int argc, char *argv[]) {
 				LOG_info("res_path: %s\n", res_path);
 				if (exists(res_path)) {
 					had_thumb = 1;
-					SDL_Surface* thumb = IMG_Load(res_path);
+					static SDL_Surface* thumb = NULL; static char thumb_path[MAX_PATH] = ""; if (strcmp(res_path, thumb_path)!=0) { if (thumb) SDL_FreeSurface(thumb); thumb = IMG_Load(res_path); strcpy(thumb_path, res_path); }
 					ox = MAX(FIXED_WIDTH - FIXED_HEIGHT, (FIXED_WIDTH - thumb->w));
 					oy = (FIXED_HEIGHT - thumb->h) / 2;
 					SDL_BlitSurface(thumb, NULL, screen, &(SDL_Rect){ox,oy});
-					SDL_FreeSurface(thumb);
 				}
 			}
 			
@@ -1626,6 +1630,29 @@ int main (int argc, char *argv[]) {
 						char display_name[256];
 						int text_width = GFX_truncateText(font.large, entry_unique ? entry_unique : entry_name, display_name, available_width, SCALE1(BUTTON_PADDING*2));
 						int max_width = MIN(available_width, text_width);
+                                                if (j==selected_row) {
+                                                        char* full_name = entry_unique ? entry_unique : entry_name;
+                                                        int full_w; TTF_SizeUTF8(font.large, full_name, &full_w, NULL);
+                                                        int inner = available_width - SCALE1(BUTTON_PADDING*2);
+                                                        int overflow = full_w - inner;
+                                                        if (overflow > 0) {
+                                                                int hold = 1000, speed = 60;
+                                                                int travel = overflow * 1000 / speed; if (travel < 1) travel = 1;
+                                                                int cycle = 2*hold + 2*travel;
+                                                                int t = (int)(scroll_elapsed % cycle);
+                                                                int offset;
+                                                                if (t < hold) offset = 0;
+                                                                else if (t < hold+travel) offset = (t-hold) * overflow / travel;
+                                                                else if (t < 2*hold+travel) offset = overflow;
+                                                                else offset = overflow - (t-(2*hold+travel)) * overflow / travel;
+                                                                GFX_blitPill(ASSET_WHITE_PILL, screen, &(SDL_Rect){ SCALE1(PADDING), SCALE1(PADDING+(j*PILL_SIZE)), available_width, SCALE1(PILL_SIZE) });
+                                                                SDL_Surface* mtext = TTF_RenderUTF8_Blended(font.large, full_name, COLOR_BLACK);
+                                                                SDL_BlitSurface(mtext, &(SDL_Rect){ offset, 0, inner, mtext->h }, screen, &(SDL_Rect){ SCALE1(PADDING+BUTTON_PADDING), SCALE1(PADDING+(j*PILL_SIZE)+4) });
+                                                                SDL_FreeSurface(mtext);
+                                                                is_scrolling = 1;
+                                                                continue;
+                                                        }
+                                                }
 						if (j==selected_row) {
 							GFX_blitPill(ASSET_WHITE_PILL, screen, &(SDL_Rect){
 								SCALE1(PADDING),
@@ -1698,6 +1725,7 @@ int main (int argc, char *argv[]) {
 			dirty = 0;
 		}
 		else GFX_sync();
+if (is_scrolling) dirty = 1;
 		
 		// if (!first_draw) {
 		// 	first_draw = SDL_GetTicks();
