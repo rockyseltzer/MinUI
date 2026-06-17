@@ -13,9 +13,23 @@ struct Cheats cheatcodes;
 #define CHEAT_MAX_LINES    3
 
 static size_t parse_count(FILE *file) {
-	size_t count = 0;
-	fscanf(file, " cheats = %lu\n", (unsigned long *)&count);
-	return count;
+    // Sync-merged .cht files concatenate multiple "cheats = N" headers with
+    // continuous indices, so trusting the first header under-counts.
+    // Scan the whole file and size to the highest cheatN index + 1.
+    size_t count = 0;
+    long pos = ftell(file);
+    char line[512];
+    while (fgets(line, sizeof(line), file)) {
+        const char *ptr = strstr(line, "cheat");
+        if (ptr) {
+            int index = -1;
+            if (sscanf(ptr, "cheat%d", &index) == 1 && index >= 0) {
+                if ((size_t)(index + 1) > count) count = (size_t)(index + 1);
+            }
+        }
+    }
+    fseek(file, pos, SEEK_SET);
+    return count;
 }
 
 static const char *find_val(const char *start) {
@@ -99,7 +113,7 @@ static int parse_cheats(struct Cheats *cheats, FILE *file) {
 			size_t len;
 			sscanf(ptr, "cheat%d", &index);
 
-			if (index >= cheats->count)
+			if (index < 0 || index >= cheats->count)
 				continue;
 			cheat = &cheats->cheats[index];
 
