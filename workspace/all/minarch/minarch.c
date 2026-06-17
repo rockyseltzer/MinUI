@@ -18,6 +18,7 @@
 #include "api.h"
 #include "config.h"
 #include "ma_cheats.h"
+static void Cheats_apply(void);
 #include "utils.h"
 #include "scaler.h"
 
@@ -2980,15 +2981,7 @@ void Core_load(void) {
 	core.load_game(&game_info);
 
     // load & apply cheats for this game
-    if (Cheats_load()) {
-        if (core.cheat_reset) core.cheat_reset();
-        if (core.cheat_set) {
-            for (size_t i=0; i<cheatcodes.count; i++) {
-                if (cheatcodes.cheats[i].enabled && cheatcodes.cheats[i].code)
-                    core.cheat_set((unsigned)i, true, cheatcodes.cheats[i].code);
-            }
-        }
-    }
+    if (Cheats_load()) Cheats_apply();
 	
 	SRAM_read();
 	RTC_read();
@@ -3586,6 +3579,49 @@ static int OptionQuicksave_onConfirm(MenuList* list, int i) {
 	PWR_powerOff();
 }
 
+static void Cheats_apply(void) {
+    if (core.cheat_reset) core.cheat_reset();
+    if (core.cheat_set) {
+        for (size_t i=0; i<cheatcodes.count; i++) {
+            if (cheatcodes.cheats[i].enabled && cheatcodes.cheats[i].code)
+                core.cheat_set((unsigned)i, true, cheatcodes.cheats[i].code);
+        }
+    }
+}
+static char* cheat_labels[] = { "OFF", "ON", NULL };
+static int OptionCheats_optionChanged(MenuList* list, int i) {
+    MenuItem* item = &list->items[i];
+    if ((size_t)i < cheatcodes.count) {
+        cheatcodes.cheats[i].enabled = item->value;
+        Cheats_apply();
+    }
+    return MENU_CALLBACK_NOP;
+}
+static MenuList OptionCheats_menu = {
+    .type = MENU_VAR,
+    .on_change = OptionCheats_optionChanged,
+    .items = NULL,
+};
+static int OptionCheats_openMenu(MenuList* list, int i) {
+    if (cheatcodes.count==0)
+        return Menu_message("No cheats found for this game", (char*[]){ "B","BACK", NULL });
+    if (OptionCheats_menu.items==NULL) {
+        OptionCheats_menu.items = calloc(cheatcodes.count+1, sizeof(MenuItem));
+        for (size_t j=0; j<cheatcodes.count; j++) {
+            MenuItem* item = &OptionCheats_menu.items[j];
+            item->name = (char*)cheatcodes.cheats[j].name;
+            item->desc = (char*)cheatcodes.cheats[j].info;
+            item->value = cheatcodes.cheats[j].enabled;
+            item->values = cheat_labels;
+        }
+    }
+    else {
+        for (size_t j=0; j<cheatcodes.count; j++)
+            OptionCheats_menu.items[j].value = cheatcodes.cheats[j].enabled;
+    }
+    Menu_options(&OptionCheats_menu);
+    return MENU_CALLBACK_NOP;
+}
 static MenuList options_menu = {
 	.type = MENU_LIST,
 	.items = (MenuItem[]) {
@@ -3593,6 +3629,7 @@ static MenuList options_menu = {
 		{"Emulator",.on_confirm=OptionEmulator_openMenu},
 		{"Controls",.on_confirm=OptionControls_openMenu},
 		{"Shortcuts",.on_confirm=OptionShortcuts_openMenu}, 
+{"Cheats",.on_confirm=OptionCheats_openMenu},
 		{"Save Changes",.on_confirm=OptionSaveChanges_openMenu},
 		{NULL},
 		{NULL},
