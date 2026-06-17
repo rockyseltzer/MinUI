@@ -345,4 +345,5 @@ finish:
 
 	if (file)
 		fclose(file);
+        return success;
 }
