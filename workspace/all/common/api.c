@@ -1503,6 +1503,17 @@ int PWR_ignoreSettingInput(int btn, int show_setting) {
 	return show_setting && (btn==BTN_MOD_PLUS || btn==BTN_MOD_MINUS);
 }
 
+
+static void PWR_logBattery(void) {
+    long up = 0;
+    FILE* uf = fopen("/proc/uptime", "r");
+    if (uf) { double s = 0; if (fscanf(uf, "%lf", &s)==1) up = (long)s; fclose(uf); }
+    FILE* f = fopen(USERDATA_PATH "/battery.csv", "a");
+    if (!f) return;
+    fprintf(f, "%ld,%d,%d\n", up, pwr.charge, pwr.is_charging);
+    fclose(f);
+}
+
 void PWR_update(int* _dirty, int* _show_setting, PWR_callback_t before_sleep, PWR_callback_t after_sleep) {
 	int dirty = _dirty ? *_dirty : 0;
 	int show_setting = _show_setting ? *_show_setting : 0;
@@ -1531,6 +1542,12 @@ void PWR_update(int* _dirty, int* _show_setting, PWR_callback_t before_sleep, PW
 		checked_charge_at = now;
 	}
 	
+    static uint32_t logged_battery_at = 0;
+    if (logged_battery_at==0 || now-logged_battery_at>=60000) {
+        PWR_logBattery();
+        logged_battery_at = now;
+    }
+
 	if (PAD_justReleased(BTN_POWEROFF) || (power_pressed_at && now-power_pressed_at>=1000)) {
 		if (before_sleep) before_sleep();
 		PWR_powerOff();

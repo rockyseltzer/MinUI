@@ -21,6 +21,7 @@ all:
 	cd ./all/minui/ && make
 	cd ./all/minarch/ && make
 	cd ./all/clock/ && make
+	cd ./all/battery/ && make
 	cd ./all/minput/ && make
 	cd ./all/syncsettings/ && make
 	cd ./all/say/ && make
@@ -33,6 +34,7 @@ clean:
 	cd ./all/minui/ && make clean
 	cd ./all/minarch/ && make clean
 	cd ./all/clock/ && make clean
+	cd ./all/battery/ && make clean
 	cd ./all/minput/ && make clean
 	cd ./all/syncsettings/ && make clean
 	cd ./all/say/ && make clean
