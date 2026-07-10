@@ -1,7 +1,6 @@
 #ifndef __SUNXI_DISPLAY_H__
 #define __SUNXI_DISPLAY_H__
 
-typedef int bool;
 typedef unsigned int u32;
 
 struct disp_manager;
@@ -193,7 +192,7 @@ typedef struct
 	disp_color_space      color_space;      //color space
 	unsigned int          trd_right_addr[3];/* right address of 3d fb,
 																						used when in frame packing 3d mode */
-	bool                  pre_multiply;     //true: pre-multiply fb
+	int                   pre_multiply;     //true: pre-multiply fb
 	disp_rect64           crop;             //crop rectangle boundaries
 	disp_buffer_flags     flags;            //indicate stereo or non-stereo buffer
 	disp_scan_flags       scan;             //scan type & scan order
@@ -208,7 +207,7 @@ typedef struct
 	unsigned char             alpha_mode;  //0: pixel alpha;  1: global alpha;  2: global pixel alpha
 	unsigned char             alpha_value; //global alpha value
 	disp_rect                 screen_win;  //display window on the screen
-	bool                      b_trd_out;   //3d display
+	int                       b_trd_out;   //3d display
 	disp_3d_out_mode          out_trd_mode;//3d display mode
 	union {
 		unsigned int            color;       //valid when LAYER_MODE_COLOR
@@ -222,7 +221,7 @@ typedef struct
 typedef struct
 {
 	disp_layer_info info;
-	bool enable;
+	int  enable;
 	unsigned int channel;
 	unsigned int layer_id;
 }disp_layer_config;
@@ -269,7 +268,7 @@ typedef struct
 	unsigned int    ver_sync_time;
 	unsigned int    hor_sync_polarity;//0: negative, 1: positive
 	unsigned int    ver_sync_polarity;//0: negative, 1: positive
-	bool            b_interlace;
+	int             b_interlace;
 	unsigned int    vactive_space;
 	unsigned int    trd_mode;
 }disp_video_timings;

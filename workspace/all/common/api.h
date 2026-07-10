@@ -1,5 +1,6 @@
 #ifndef __API_H__
 #define __API_H__
+#include <stdbool.h>
 #include "sdl.h"
 #include "platform.h"
 #include "scaler.h"
@@ -343,4 +344,65 @@ char* PLAT_getModel(void);
 int PLAT_isOnline(void);
 int PLAT_setDateTime(int y, int m, int d, int h, int i, int s);
 
+
+//////////////////////////////// WiFi (ported from NextUI generic_wifi engine)
+#define SSID_MAX 64
+#define SCAN_MAX_RESULTS 128
+
+typedef enum {
+	SECURITY_NONE = 0,
+	SECURITY_WPA_PSK,
+	SECURITY_WPA2_PSK,
+	SECURITY_WEP,
+	SECURITY_UNSUPPORTED,
+} WifiSecurityType;
+
+struct WIFI_network {
+	char bssid[128];
+	char ssid[SSID_MAX];
+	int freq;
+	int rssi;
+	WifiSecurityType security;
+	bool wps;
+};
+
+struct WIFI_connection {
+	bool valid;
+	char ssid[SSID_MAX];
+	char ip[32];
+	int freq;
+	int rssi;
+	int link_speed;
+	int noise;
+};
+
+void PLAT_wifiInit();
+bool PLAT_hasWifi();
+bool PLAT_wifiEnabled();
+void PLAT_wifiEnable(bool on);
+int PLAT_wifiScan(struct WIFI_network *networks, int max);
+bool PLAT_wifiConnected();
+int PLAT_wifiConnection(struct WIFI_connection *connection_info);
+bool PLAT_wifiHasCredentials(char *ssid, WifiSecurityType sec);
+void PLAT_wifiForget(char *ssid, WifiSecurityType sec);
+void PLAT_wifiConnect(char *ssid, WifiSecurityType sec);
+void PLAT_wifiConnectPass(const char *ssid, WifiSecurityType sec, const char* pass);
+void PLAT_wifiDisconnect();
+bool PLAT_wifiDiagnosticsEnabled();
+void PLAT_wifiDiagnosticsEnable(bool on);
+
+#define WIFI_init PLAT_wifiInit
+#define WIFI_supported PLAT_hasWifi
+#define WIFI_enabled PLAT_wifiEnabled
+#define WIFI_enable PLAT_wifiEnable
+#define WIFI_scan PLAT_wifiScan
+#define WIFI_connected PLAT_wifiConnected
+#define WIFI_connectionInfo PLAT_wifiConnection
+#define WIFI_isKnown PLAT_wifiHasCredentials
+#define WIFI_forget PLAT_wifiForget
+#define WIFI_connect PLAT_wifiConnect
+#define WIFI_connectPass PLAT_wifiConnectPass
+#define WIFI_disconnect PLAT_wifiDisconnect
+#define WIFI_diagnosticsEnabled PLAT_wifiDiagnosticsEnabled
+#define WIFI_diagnosticsEnable PLAT_wifiDiagnosticsEnable
 #endif

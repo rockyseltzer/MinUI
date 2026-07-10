@@ -1,5 +1,6 @@
 // trimuismart
 #include <stdio.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <linux/fb.h>
 #include <sys/ioctl.h>
@@ -13,10 +14,10 @@
 
 #include "defines.h"
 #include "platform.h"
+#include "sunxi_display2.h"
 #include "api.h"
 #include "utils.h"
 
-#include "sunxi_display2.h"
 #include "ion.h"
 #include "ion_sunxi.h"
 #include "scaler.h"
@@ -531,3 +532,19 @@ char* PLAT_getModel(void) {
 int PLAT_isOnline(void) {
 	return 0;
 }
+///////////////////////////////
+// WiFi: XRadio/Realtek combo via generic wpa_cli engine.
+// connection_reset is required by generic_wifi.c (PLAT_wifiConnection).
+static inline void connection_reset(struct WIFI_connection *connection_info)
+{
+	connection_info->valid = false;
+	connection_info->freq = -1;
+	connection_info->link_speed = -1;
+	connection_info->noise = -1;
+	connection_info->rssi = -1;
+	*connection_info->ip = '\0';
+	*connection_info->ssid = '\0';
+}
+
+#define WIFI_SOCK_DIR "/etc/wifi/sockets"
+#include "generic_wifi.c"
