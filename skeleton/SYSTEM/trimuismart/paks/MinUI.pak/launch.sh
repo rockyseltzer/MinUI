@@ -24,6 +24,12 @@ export SHARED_USERDATA_PATH="$SDCARD_PATH/.userdata/shared"
 export LOGS_PATH="$USERDATA_PATH/logs"
 export DATETIME_PATH="$SHARED_USERDATA_PATH/datetime.txt"
 
+# Constrain SDL's ALSA buffer. By default SDL 1.2 lets ALSA pick the buffer
+# size, which over bluealsa comes out around 24000 frames (~500ms of audio
+# latency). With this set, SDL calls snd_pcm_hw_params_set_buffer_size_near()
+# so the buffer tracks the requested period size instead.
+export SDL_AUDIO_ALSA_SET_BUFFER_SIZE=1
+
 mkdir -p "$USERDATA_PATH"
 mkdir -p "$LOGS_PATH"
 mkdir -p "$SHARED_USERDATA_PATH/.minui"

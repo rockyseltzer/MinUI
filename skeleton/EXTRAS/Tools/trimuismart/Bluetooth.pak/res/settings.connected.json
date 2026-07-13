@@ -1,0 +1,30 @@
+{
+    "settings": [
+        {
+            "name": "Enable",
+            "options": ["Off", "On"],
+            "selected": IS_ENABLED,
+            "features": { "confirm_text": "SAVE" }
+        },
+        {
+            "name": "Audio to Bluetooth",
+            "options": ["Off", "On"],
+            "selected": IS_AUDIO_BT,
+            "features": { "confirm_text": "SAVE" }
+        },
+        {
+            "name": "Connect a device",
+            "features": { "confirm_text": "SCAN" }
+        },
+        {
+            "name": "Forget a device",
+            "features": { "confirm_text": "FORGET" }
+        },
+        {
+            "name": "Device",
+            "options": ["DEVICE_NAME"],
+            "selected": 0,
+            "features": { "unselectable": true }
+        }
+    ]
+}
