@@ -42,3 +42,12 @@ Inside the trimuismart toolchain container
 Each produces `<name>-trimuismart`; copy it to `bin/trimuismart/<name>`
 (dropping the suffix). They build against SDL 1.2 and MinUI's own api.c, and
 link only libraries already present on the device.
+
+## Local patch to minui-presenter
+
+The bundled `bin/trimuismart/minui-presenter` carries a local change on top of
+upstream: support for explicit newlines in `--message`. Upstream splits the
+message on spaces and word-wraps it, so `\n` is never a line break. The patch
+splits on newlines first, word-wraps each line, and forces a row break between
+them (adds a `force_break` flag to `struct Message`, switches the tokenizer to
+nested `strtok_r` on "\n" then " ", and honors the flag in the packing loop).
