@@ -1,110 +1,212 @@
-# MinUI
+# MinUI — TrimUI Smart
 
-MinUI is a focused, custom launcher and libretro frontend for [a variety of retro handhelds](#supported-devices).
+A fork of [MinUI](https://github.com/shauninman/MinUI) focused entirely on the **TrimUI Smart** (`trimuismart`), adding arcade support, WiFi, Bluetooth audio, cheats, and clock sync.
 
-<img src="github/minui-main.png" width=320 /> <img src="github/minui-menu-gbc.png" width=320 /> 
+> [!NOTE]
+> This fork only targets the original TrimUI Smart (Allwinner S3, 320×240). Other
+> devices are inherited from upstream and are untested here. If you have a
+> different handheld, use [upstream MinUI](https://github.com/shauninman/MinUI).
 
-## Features
+## What This Fork Adds
 
-- Simple launcher, simple SD card
-- No settings or configuration
-- No boxart, themes, or distractions
-- Automatically hides hidden files
-  and extension and region/version 
-  cruft in display names
-- Consistent in-emulator menu with
-  quick access to save states, disc
-  changing, and emulator options
-- Automatically sleeps after 30 seconds 
-  or press POWER to sleep (and wake)
-- Automatically powers off while asleep
-  after two minutes or hold POWER for
-  one second
-- Automatically resumes right where
-  you left off if powered off while
-  in-game, manually or while asleep
-- Resume from manually created, last 
-  used save state by pressing X in 
-  the launcher instead of A
-- Streamlined emulator frontend 
-  (minarch + libretro cores)
-- Single SD card compatible with
-  multiple devices from different
-  manufacturers
+| Feature | Summary |
+| --- | --- |
+| **Arcade** | Neo Geo, CPS-1 and CPS-2 via split FB Alpha cores, with automatic BIOS handling |
+| **Arcade Names** | A tool that turns cryptic ROM filenames (`mslug.zip`) into real titles |
+| **Battery Graph** | See what the battery actually does over time, with a runtime estimate |
+| **Bluetooth** | Scan, pair, connect, and route all audio to a Bluetooth speaker |
+| **Cheats** | RetroArch-format `.cht` files, toggled per code from the in-game menu |
+| **Sync Clock** | The Smart has no RTC — set the clock from NTP so it survives a power cycle |
+| **WiFi** | Scan, pick a network, type the password on an on-screen keyboard, auto-connect on boot |
 
-You can [grab the latest version here](https://github.com/shauninman/MinUI/releases).
+Everything else behaves like upstream MinUI: no themes, no boxart, no settings to fiddle with.
 
-> Devices with a physical power switch
-> use MENU to sleep and wake instead of
-> POWER. Once asleep the device can safely
-> be powered off manually with the switch.
+## Supported Consoles
 
-## Supported consoles
-
-Base:
+**Base**
 
 - Game Boy
-- Game Boy Color
 - Game Boy Advance
+- Game Boy Color
 - Nintendo Entertainment System
-- Super Nintendo Entertainment System
-- Sega Genesis
 - PlayStation
+- Sega Genesis
+- Super Nintendo Entertainment System
 
-Extras:
+**Extras**
 
+- Famicom Disk System
 - Neo Geo Pocket (and Color)
 - Pico-8
-- Pokémon mini
+- Pokémon mini
+- Sega 32X
 - Sega Game Gear
 - Sega Master System
 - Super Game Boy
 - TurboGrafx-16 (and TurboGrafx-CD)
 - Virtual Boy
 
-## Supported Devices
+**Arcade** *(added by this fork)*
 
-| Device | Added | Status |
-| -- | -- | -- |
-| Anbernic RG28xx | MinUI-20240429b-2 | Legacy |
-| Anbernic RG34xx | MinUI-20241227-0 | Legacy |
-| Anbernic RG34xxSP | MinUI-20250920-0 | Legacy |
-| Anbernic RG35xx | MinUI-20230922b-2 | Legacy |
-| Anbernic RG35xx Plus | MinUI-20240106b-0 | Legacy |
-| Anbernic RG35xxH | MinUI-20240120b-1 | Legacy |
-| Anbernic RG35xxSP | MinUI-20240525-0 | Legacy |
-| Anbernic RG40xxH | MinUI-20240717-1 | Legacy |
-| Anbernic RG40xxV | MinUI-20240831-0 | Legacy | 
-| Anbernic RG CubeXX | MinUI-202401028-0 | Legacy | 
-| GKD Pixel | MinUI-20240120b-1 | Legacy |
-| M17 | MinUI-20231126b-2 | Legacy |
-| MagicX XU Mini M | MinUI-20240831-0 | Legacy | 
-| MagicX Mini Zero 28 | MinUI-20250111-0 | Legacy |
-| Miyoo A30 | MinUI-20240705-0 | Legacy |
-| Miyoo Flip | MinUI-20250111-0 | Legacy |
-| Miyoo Mini | MinUI-20230922b-2 | Legacy |
-| Miyoo Mini Flip | MinUI-20251023-0 | Legacy |
-| Miyoo Mini Plus | MinUI-20230922b-2 | Legacy |
-| Powkiddy RGB30 | MinUI-20231014b-1 | Legacy |
-| Trimui Brick | MinUI-20241028-0 | Legacy |
-| Trimui Smart | MinUI-20230922b-2 | Legacy |
-| Trimui Smart Pro | MinUI-20231111b-2 | Legacy |
+| System | Folder | Core |
+| --- | --- | --- |
+| CPS-1 | `Roms/CPS-1 (CPS1)` | `fbalpha2012_cps1` |
+| CPS-2 | `Roms/CPS-2 (CPS2)` | `fbalpha2012_cps2` |
+| Neo Geo | `Roms/Neo Geo (NEOGEO)` | `fbalpha2012_neogeo` |
+
+> [!IMPORTANT]
+> These are the **split** FB Alpha cores (roughly FBA 0.2.97.29). ROMs must match
+> that vintage — a modern FBNeo set will not load. A single unified "Arcade"
+> folder is **not** supported; put each system's ROMs in its own folder above.
+
+---
+
+## Arcade Setup
+
+### Controls
+
+**CPS-1 / CPS-2** use all six buttons, laid out like an arcade cabinet:
+
+|  | Light | Medium | Heavy |
+| --- | --- | --- | --- |
+| **Punch** | `Y` | `X` | `L` |
+| **Kick** | `B` | `A` | `R` |
+
+**Neo Geo** uses its native four buttons: `A` `B` `X` `Y`.
+
+No configuration needed — these are the cores' defaults.
+
+### Game Names
+
+Arcade ROMs are named things like `mslug.zip` and `ssf2t.zip`. MinUI reads a
+`map.txt` in each ROM folder to display real titles instead.
+
+```sh
+tools/make-arcade-map.sh "/path/to/Roms/CPS-2 (CPS2)"
+```
+
+Run it once per arcade folder. It reads the `.zip` files already there, looks up
+their titles in FB Alpha's gamelist (downloaded automatically), and writes
+`map.txt`. It **only writes names** — it never moves, renames, or deletes a ROM.
+
+### Neo Geo BIOS
+
+Put `neogeo.zip` in **`Bios/NEOGEO/`** and forget about it.
+
+The core actually wants the BIOS in the ROM folder, not the BIOS folder — so the
+Neo Geo pak copies it next to the game at launch and removes it on exit. That
+keeps `neogeo` out of your game list, and it never touches a `neogeo.zip` you
+placed in the ROM folder yourself.
+
+---
+
+## Cheats
+
+Drop RetroArch-format `.cht` files in `Cheats/<SYSTEM>/`, named to match the ROM:
+
+```
+Cheats/GB/Super Example World.cht
+```
+
+In-game, open the menu and go to **Options → Cheats**. Each code is listed with
+its description and toggles `OFF` / `ON`. Changes apply immediately, and your
+choices are remembered per game.
+
+> [!TIP]
+> Filenames are matched flexibly — with or without the ROM extension, with or
+> without region tags like `(USA)`, and honoring the display names in `map.txt`.
+> Most cheat packs work as-is.
+
+---
+
+## Tools
+
+### Battery Graph
+
+**Tools → Battery**
+
+The launcher samples the battery level in the background, and this shows it as a
+graph over time — with a time axis and an estimate of how much runtime is left.
+Useful for actually knowing what your battery does under load, rather than
+guessing from a four-bar icon.
+
+### Bluetooth
+
+**Tools → Bluetooth**
+
+Scan, pair, and connect a Bluetooth speaker or headphones, then flip **Audio to
+Bluetooth** to send everything — games, menus, the lot — to it. Turn it off and
+audio returns to the built-in speaker.
+
+> [!WARNING]
+> **Bluetooth audio adds roughly 200ms of latency.** That's inherent to SBC over
+> A2DP plus the speaker's own buffering, not something this fork can fix. Fine
+> for music, menus, and slower games; **not recommended for fighting games or
+> anything twitchy.**
 
 > [!NOTE]
-> **Active** actively working on compatibility and improvements specific to this device  
-> **Maintained** inheriting improvements to common functionality  
-> **Legacy** will be retired in a future update  
-> **Retired** removed from repo, no longer updated or packaged with new releases
+> **AirPods do not work.** They pair and report as connected, but BlueZ never
+> completes the audio stream negotiation and no sound reaches them — a known
+> AirPods/BlueZ incompatibility. Ordinary Bluetooth speakers and headphones work
+> fine.
 
-## Legacy versions
+### Sync Clock
 
-The original Trimui Model S version of MinUI (2021/04/03-2021/08/06) has been archived [here](https://github.com/shauninman/MinUI-Legacy-Trimui-Model-S).
+**Tools → Sync Clock**
 
-The sequel, MiniUI for the Miyoo Mini (2022/04/20-2022/10/23), has been archived [here](https://github.com/shauninman/MiniUI-Legacy-Miyoo-Mini).
+The TrimUI Smart has **no real-time clock** — no battery-backed RTC — so it has
+no idea what time it is when you power it on. Out of the box it starts at
+1 January 1970 and stays there.
 
-The return of MinUI for the original Anbernic RG35XX (2023/02/26-2023/03/26) has been archived [here](https://github.com/shauninman/MinUI-Legacy-RG35XX).
+This tool sets the clock from an NTP server over WiFi and saves it, so the
+correct time is restored on the next boot. Sync it once and you're set; sync
+again whenever it drifts.
 
-The current MinUI which introduced support for multiple devices starting with the Trimui Smart, Miyoo Mini (and Plus), and the original Anbernic RG35XX was released on [2023/09/22][init-release] with the initial functional commit 6 months earlier on [2023/03/27][init-commit].
+> [!NOTE]
+> The clock runs in **UTC** — MinUI sets the system clock with `date -u`, so no
+> timezone offset is applied.
 
-[init-release]:https://github.com/shauninman/MinUI/releases/tag/v20230922b-2
-[init-commit]:https://github.com/shauninman/MinUI/commit/53e0296ea5a2794290fb5783765af6cee0063445#diff-b993e61ab6e66a19b67c88cfb98261aa9267d250de8bb56463662f67aae1a558
+> [!IMPORTANT]
+> Connect to WiFi first (**Tools → Wifi**). This tool doesn't turn the radio on
+> for you — if there's no connection it will say so and exit.
+
+### WiFi
+
+**Tools → Wifi**
+
+Scan for networks, pick one, and type the password on an on-screen keyboard.
+Credentials are saved, so it reconnects on its own next time. Turn on **Start on
+boot** and WiFi comes up automatically at every boot.
+
+---
+
+## Other Improvements
+
+- **Japanese / CJK game names** — the UI font renders Chinese, Japanese, and
+  Korean characters, so import ROMs with native-script filenames display properly
+  instead of as empty boxes. A second font is bundled and can be selected in the
+  config.
+- **Scrolling titles** — long game names scroll (marquee-style) when highlighted,
+  instead of being cut off mid-word.
+
+---
+
+## Installing
+
+Same as upstream MinUI: unzip the release onto a FAT32 SD card and boot the
+device. See [upstream's instructions](https://github.com/shauninman/MinUI) for
+the details.
+
+---
+
+## Credits
+
+Built on [**MinUI**](https://github.com/shauninman/MinUI) by Shaun Inman (GPL-3.0).
+
+- Arcade emulation via the [**FB Alpha**](https://github.com/libretro/fbalpha) split cores.
+- The CJK font and the WiFi engine (`generic_wifi.c`) are adapted from [**NextUI**](https://github.com/LoveRetro/NextUI) (GPL-3.0).
+- The UI binaries (`minui-keyboard`, `minui-list`, `minui-presenter`) are josegonzalez's, cross-compiled for this platform (MIT).
+- `Wifi.pak` is adapted from [**minui-wifi-pak**](https://github.com/josegonzalez/minui-wifi-pak) by josegonzalez (MIT).
+
+Each pak's `CREDITS.md` documents its upstream sources, local patches, and how to
+rebuild its binaries.
